@@ -1,0 +1,52 @@
+<resources>
+    <!-- Settings -->
+    <array name="unit_labels">
+        <item>@string/imperial_units</item>
+        <item>@string/metric_units</item>
+    </array>
+
+    <array name="unit_values">
+        <item>@string/imperial_units_value</item>
+        <item>@string/metric_units_value</item>
+    </array>
+
+    <string-array name="input_array">
+        <item>Manual</item>
+        <item>GPS</item>
+        <item>Automatic</item>
+    </string-array>
+
+    <string-array name="activity_array">
+        <item>Running</item>
+        <item>Walking</item>
+        <item>Cycling</item>
+        <item>Hiking</item>
+        <item>Downhill Skiing</item>
+        <item>Cross-Country Skiing</item>
+        <item>Snowboarding</item>
+        <item>Skating</item>
+        <item>Mountain Biking</item>
+        <item>Elliptical</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="manual_input_array">
+        <item>Date</item>
+        <item>Time</item>
+        <item>Duration</item>
+        <item>Distance</item>
+        <item>Calories</item>
+        <item>Heartbeat</item>
+        <item>Comment</item>
+    </string-array>
+
+    <string-array name="profile_choices" >
+        <item>Camera</item>
+        <item>Gallery</item>
+    </string-array>
+
+    <string name="imperial_units">Imperial Units (ft)</string>
+    <string name="metric_units">Metric Units (km)</string>
+    <string name="imperial_units_value">ft</string>
+    <string name="metric_units_value">km</string>
+</resources>

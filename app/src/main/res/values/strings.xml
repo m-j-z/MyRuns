@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">MyRuns</string>
+
+    <!-- UI -->
+    <string name="start_fragment">start</string>
+    <string name="history_fragment">history</string>
+    <string name="settings_fragment">settings</string>
+
+    <!-- Start Fragment -->
+    <string name="input_type_tv">INPUT TYPE</string>
+    <string name="activity_type_tv">ACTIVITY TYPE</string>
+
+    <!-- Settings Fragment -->
+    <string name="account_preferences">Account Preferences</string>
+    <string name="user_profile">User Profile</string>
+    <string name="user_profile_summary">Name, E-mail, Phone number, etc.</string>
+    <string name="privacy_setting">Privacy Setting</string>
+    <string name="privacy_setting_summary">Post your records anonymously?</string>
+    <string name="additional_settings">Additional Settings</string>
+    <string name="unit_preference">Unit Preference</string>
+    <string name="unit_preference_summary">Select the units in which you would like to see distance values in.</string>
+    <string name="comments">Comments</string>
+    <string name="comments_summary">Any suggestions for this course?</string>
+    <string name="misc_settings">Miscellaneous Settings</string>
+    <string name="class_homepage">Class Homepage</string>
+    <string name="class_homepage_summary">Visit the class homepage.</string>
+
+    <!-- User Profile -->
+    <string name="profile_picture_hint">Profile Picture</string>
+    <string name="camera_hint">Take a picture</string>
+    <string name="name_hint">Name</string>
+    <string name="email_hint">E-mail</string>
+    <string name="phone_number_hint">Phone number</string>
+    <string name="gender_hint">Select gender…</string>
+    <string name="female_radio">Female</string>
+    <string name="male_radio">Male</string>
+    <string name="class_hint">Class (e.g., 362)</string>
+    <string name="major_hint">Major (e.g., Computing Science)</string>
+    <string name="cancel_label">Cancel</string>
+    <string name="save_label">Save</string>
+    <string name="start_btn">start</string>
+
+</resources>

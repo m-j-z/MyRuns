@@ -1,0 +1,5 @@
+<paths>
+    <external-path
+        name="profile_path"
+        path="." />
+</paths>

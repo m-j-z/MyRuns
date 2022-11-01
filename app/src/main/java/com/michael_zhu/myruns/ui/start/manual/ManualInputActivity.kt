@@ -278,8 +278,12 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun saveNewEntry() {
+        val preference = PreferenceManager.getDefaultSharedPreferences(this)
+        val unitPref = preference.getString("unit_preference", "km").toString()
+
         val entry = Entry(
             inputType = "Manual",
+            unitSavedAs = unitPref,
             activityType = viewModel.activityType,
             date = viewModel.dateEpoch,
             time = viewModel.timeEpoch,

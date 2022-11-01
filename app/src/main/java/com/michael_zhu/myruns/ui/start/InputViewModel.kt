@@ -1,7 +1,9 @@
 package com.michael_zhu.myruns.ui.start
 
 import androidx.lifecycle.ViewModel
-import java.util.Calendar
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.*
 
 class InputViewModel : ViewModel() {
     var activityType: String = "Running"
@@ -13,6 +15,7 @@ class InputViewModel : ViewModel() {
     var durationHour: Int = 0
     var durationMinute: Int = 0
     var durationSecond: Int = 0
+    var distanceSavedAsUnit: String = "km"
 
     // For data entry
     var dateEpoch: Long = 0
@@ -31,6 +34,10 @@ class InputViewModel : ViewModel() {
         dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
         hourOfDay = calendar.get(Calendar.HOUR_OF_DAY)
         minute = calendar.get(Calendar.MINUTE)
+
+        val localDateTime = LocalDateTime.of(year, month + 1, dayOfMonth, 0, 0)
+        dateEpoch = localDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        timeEpoch = (hourOfDay * 3600 + minute * 60).toLong()
     }
 
 }

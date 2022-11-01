@@ -45,8 +45,8 @@
         <item>Gallery</item>
     </string-array>
 
-    <string name="imperial_units">Imperial Units (ft)</string>
+    <string name="imperial_units">Imperial Units (mi)</string>
     <string name="metric_units">Metric Units (km)</string>
-    <string name="imperial_units_value">ft</string>
+    <string name="imperial_units_value">mi</string>
     <string name="metric_units_value">km</string>
 </resources>

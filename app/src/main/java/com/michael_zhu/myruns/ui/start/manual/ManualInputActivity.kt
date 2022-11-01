@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.michael_zhu.myruns.R
+import com.michael_zhu.myruns.database.*
 import com.michael_zhu.myruns.ui.start.InputViewModel
 import com.michael_zhu.myruns.ui.start.manual.dialogs.DateDialogListener
 import com.michael_zhu.myruns.ui.start.manual.dialogs.RotatableDatePickerDialog
@@ -20,12 +21,20 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var listView: ListView
     private lateinit var cancelBtn: Button
     private lateinit var saveBtn: Button
+    private lateinit var historyDatabase: HistoryDatabase
+    private lateinit var historyDatabaseDao: HistoryDatabaseDao
+    private lateinit var historyRepository: HistoryRepository
+    private lateinit var historyViewModelFactory: HistoryViewModelFactory
+    private lateinit var historyViewModel: HistoryViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manual_input)
-
         viewModel = ViewModelProvider(this)[InputViewModel::class.java]
+
+        if (intent.extras != null) {
+            viewModel.activityType = intent.extras!!.getString("activity_type").toString()
+        }
 
         if (intent.extras != null) {
             viewModel.activityType = intent.extras!!.getString("activity_type").toString()
@@ -34,6 +43,11 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         listView = findViewById(R.id.list_view)
         cancelBtn = findViewById(R.id.cancel_btn)
         saveBtn = findViewById(R.id.save_btn)
+        historyDatabase = HistoryDatabase.getInstance(this)
+        historyDatabaseDao = historyDatabase.historyDatabaseDao
+        historyRepository = HistoryRepository(historyDatabaseDao)
+        historyViewModelFactory = HistoryViewModelFactory(historyRepository)
+        historyViewModel = ViewModelProvider(this, historyViewModelFactory)[HistoryViewModel::class.java]
 
         listView.setOnItemClickListener { _, _, position, _ ->
             when (position) {
@@ -131,12 +145,12 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         val distanceEditText: EditText = dialogView.findViewById(R.id.distance_et)
         val unitTextView: TextView = dialogView.findViewById(R.id.unit_tv)
 
+        val preference = PreferenceManager.getDefaultSharedPreferences(this)
+        unitTextView.text = preference.getString("unit_preference", "km")
+
         if (viewModel.distance != 0.0) {
             distanceEditText.setText(viewModel.distance.toString())
         }
-
-        val preference = PreferenceManager.getDefaultSharedPreferences(this)
-        unitTextView.text = preference.getString("unit_preference", "km")
 
         val listener = DialogInterface.OnClickListener { _: DialogInterface, which: Int ->
             when (which) {
@@ -146,6 +160,10 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
                         distance = distanceEditText.text.toString().toDouble()
                     }
                     viewModel.distance = distance
+                    when (unitTextView.text.toString()) {
+                        "km" -> viewModel.distanceSavedAsUnit = "km"
+                        "mi" -> viewModel.distanceSavedAsUnit = "mi"
+                    }
                 }
             }
         }
@@ -252,9 +270,25 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
                 finish()
             }
             R.id.save_btn -> {
+                saveNewEntry()
                 Toast.makeText(this, "Entry saved!", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }
+    }
+
+    private fun saveNewEntry() {
+        val entry = Entry(
+            inputType = "Manual",
+            activityType = viewModel.activityType,
+            date = viewModel.dateEpoch,
+            time = viewModel.timeEpoch,
+            duration = viewModel.duration,
+            distance = viewModel.distance,
+            calories = viewModel.calories,
+            heartRate = viewModel.heartRate,
+            comment = viewModel.comment
+        )
+        historyViewModel.insert(entry)
     }
 }

@@ -48,5 +48,13 @@
     <string name="cancel">Cancel</string>
     <string name="calories_tv">calories</string>
     <string name="heartRate_tv">bpm</string>
+    <string name="input_type_hint">Input type</string>
+    <string name="activity_type_hint">Activity type</string>
+    <string name="datetime_hint">Datetime of activity</string>
+    <string name="duration_hint">Duration of activity</string>
+    <string name="distance_hint">Distance traveled</string>
+    <string name="calories_hint">Calories expended</string>
+    <string name="heartbeat_hint">Heart rate during activity</string>
+    <string name="delete">delete</string>
 
 </resources>

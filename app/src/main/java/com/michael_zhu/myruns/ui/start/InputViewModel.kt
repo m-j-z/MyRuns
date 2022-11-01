@@ -1,9 +1,9 @@
-package com.michael_zhu.myruns.ui.start.manual
+package com.michael_zhu.myruns.ui.start
 
 import androidx.lifecycle.ViewModel
 import java.util.Calendar
 
-class ManualInputViewModel : ViewModel() {
+class InputViewModel : ViewModel() {
     var activityType: String = "Running"
     var year: Int = 0
     var month: Int = 0

@@ -4,12 +4,14 @@ import android.app.TimePickerDialog
 import android.os.Parcel
 import android.os.Parcelable
 import android.widget.TimePicker
-import com.michael_zhu.myruns.ui.start.manual.ManualInputViewModel
+import com.michael_zhu.myruns.ui.start.InputViewModel
 
 class TimeDialogListener() : TimePickerDialog.OnTimeSetListener, Parcelable {
-    lateinit var viewModel: ManualInputViewModel
+    lateinit var viewModel: InputViewModel
 
-    constructor(parcel: Parcel) : this()
+    constructor(parcel: Parcel) : this() {
+        parcel.readString()
+    }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
 

@@ -9,13 +9,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.michael_zhu.myruns.R
+import com.michael_zhu.myruns.ui.start.InputViewModel
 import com.michael_zhu.myruns.ui.start.manual.dialogs.DateDialogListener
 import com.michael_zhu.myruns.ui.start.manual.dialogs.RotatableDatePickerDialog
 import com.michael_zhu.myruns.ui.start.manual.dialogs.RotatableTimePickerDialog
 import com.michael_zhu.myruns.ui.start.manual.dialogs.TimeDialogListener
 
 class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
-    private lateinit var viewModel: ManualInputViewModel
+    private lateinit var viewModel: InputViewModel
     private lateinit var listView: ListView
     private lateinit var cancelBtn: Button
     private lateinit var saveBtn: Button
@@ -24,7 +25,7 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manual_input)
 
-        viewModel = ViewModelProvider(this)[ManualInputViewModel::class.java]
+        viewModel = ViewModelProvider(this)[InputViewModel::class.java]
 
         if (intent.extras != null) {
             viewModel.activityType = intent.extras!!.getString("activity_type").toString()

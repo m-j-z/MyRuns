@@ -4,14 +4,16 @@ import android.app.DatePickerDialog
 import android.os.Parcel
 import android.os.Parcelable
 import android.widget.DatePicker
-import com.michael_zhu.myruns.ui.start.manual.ManualInputViewModel
+import com.michael_zhu.myruns.ui.start.InputViewModel
 import java.time.LocalDateTime
 import java.time.ZoneId
 
 class DateDialogListener() : DatePickerDialog.OnDateSetListener, Parcelable {
-    lateinit var viewModel: ManualInputViewModel
+    lateinit var viewModel: InputViewModel
 
-    constructor(parcel: Parcel) : this()
+    constructor(parcel: Parcel) : this() {
+        parcel.readString()
+    }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {}
 

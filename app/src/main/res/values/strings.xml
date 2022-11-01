@@ -36,8 +36,17 @@
     <string name="male_radio">Male</string>
     <string name="class_hint">Class (e.g., 362)</string>
     <string name="major_hint">Major (e.g., Computing Science)</string>
-    <string name="cancel_label">Cancel</string>
-    <string name="save_label">Save</string>
+    <string name="cancel_btn">Cancel</string>
+    <string name="save_btn">Save</string>
     <string name="start_btn">start</string>
+
+    <!-- Duration Dialog -->
+    <string name="hour">hrs</string>
+    <string name="minute">min</string>
+    <string name="second">sec</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="calories_tv">calories</string>
+    <string name="heartRate_tv">bpm</string>
 
 </resources>

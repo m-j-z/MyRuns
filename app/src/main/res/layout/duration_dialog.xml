@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <EditText
+        android:id="@+id/hour_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:autofillHints=""
+        android:gravity="end"
+        android:hint="@null"
+        android:imeOptions="actionNext"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/hour" />
+
+    <EditText
+        android:id="@+id/minute_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:autofillHints=""
+        android:gravity="end"
+        android:hint="@null"
+        android:imeOptions="actionNext"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/minute" />
+
+    <EditText
+        android:id="@+id/second_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:autofillHints=""
+        android:gravity="end"
+        android:hint="@null"
+        android:imeOptions="actionDone"
+        android:inputType="number" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/second" />
+
+</LinearLayout>

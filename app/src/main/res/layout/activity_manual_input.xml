@@ -4,9 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.start.manual.ManualInputFragment">
+    tools:context=".ui.start.manual.ManualInputActivity">
 
     <ListView
+        android:id="@+id/list_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -23,7 +24,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/cancel_label" />
+            android:text="@string/cancel_btn" />
 
         <Button
             android:id="@+id/save_btn"
@@ -31,7 +32,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/save_label" />
+            android:text="@string/save_btn" />
 
     </LinearLayout>
 

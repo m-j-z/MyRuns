@@ -11,6 +11,9 @@ import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.michael_zhu.myruns.R
+import com.michael_zhu.myruns.ui.start.automatic.AutomaticActivity
+import com.michael_zhu.myruns.ui.start.gps.GPSActivity
+import com.michael_zhu.myruns.ui.start.manual.ManualInputActivity
 
 class StartFragment : Fragment(), View.OnClickListener {
     companion object {
@@ -66,10 +69,20 @@ class StartFragment : Fragment(), View.OnClickListener {
 
         when (v.id) {
             R.id.start_btn -> {
-                val intent = Intent(requireActivity(), InputActivity::class.java)
-                intent.putExtra("input_type", inputTypeSpinner.selectedItem.toString())
-                startActivity(intent)
+                val activityType = activityTypeSpinner.selectedItem.toString()
+
+                when (inputTypeSpinner.selectedItem.toString()) {
+                    "Manual" -> startInputActivity(ManualInputActivity::class.java, activityType)
+                    "GPS" -> startInputActivity(GPSActivity::class.java, activityType)
+                    "Automatic" -> startInputActivity(AutomaticActivity::class.java, activityType)
+                }
             }
         }
+    }
+
+    private fun startInputActivity(java: Class<*>, activityType: String) {
+        val intent = Intent(requireActivity(), java)
+        intent.putExtra("activity_type", activityType)
+        startActivity(intent)
     }
 }

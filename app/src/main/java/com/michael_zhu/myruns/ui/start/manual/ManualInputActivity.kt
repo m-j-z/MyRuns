@@ -3,9 +3,7 @@ package com.michael_zhu.myruns.ui.start.manual
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -16,9 +14,11 @@ import com.michael_zhu.myruns.ui.start.manual.dialogs.RotatableDatePickerDialog
 import com.michael_zhu.myruns.ui.start.manual.dialogs.RotatableTimePickerDialog
 import com.michael_zhu.myruns.ui.start.manual.dialogs.TimeDialogListener
 
-class ManualInputActivity : AppCompatActivity() {
+class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var viewModel: ManualInputViewModel
     private lateinit var listView: ListView
+    private lateinit var cancelBtn: Button
+    private lateinit var saveBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +31,9 @@ class ManualInputActivity : AppCompatActivity() {
         }
 
         listView = findViewById(R.id.list_view)
+        cancelBtn = findViewById(R.id.cancel_btn)
+        saveBtn = findViewById(R.id.save_btn)
+
         listView.setOnItemClickListener { _, _, position, _ ->
             when (position) {
                 0 -> onDateClicked()
@@ -42,6 +45,9 @@ class ManualInputActivity : AppCompatActivity() {
                 6 -> onCommentClicked()
             }
         }
+
+        cancelBtn.setOnClickListener(this)
+        saveBtn.setOnClickListener(this)
     }
 
     private fun onCommentClicked() {
@@ -232,5 +238,22 @@ class ManualInputActivity : AppCompatActivity() {
             setNegativeButton(R.string.cancel, listener)
         }
         builder.show()
+    }
+
+    override fun onClick(v: View?) {
+        if (v == null) {
+            return
+        }
+
+        when (v.id) {
+            R.id.cancel_btn -> {
+                Toast.makeText(this, "Entry discarded!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            R.id.save_btn -> {
+                Toast.makeText(this, "Entry saved!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
     }
 }

@@ -36,10 +36,6 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
             viewModel.activityType = intent.extras!!.getString("activity_type").toString()
         }
 
-        if (intent.extras != null) {
-            viewModel.activityType = intent.extras!!.getString("activity_type").toString()
-        }
-
         listView = findViewById(R.id.list_view)
         cancelBtn = findViewById(R.id.cancel_btn)
         saveBtn = findViewById(R.id.save_btn)

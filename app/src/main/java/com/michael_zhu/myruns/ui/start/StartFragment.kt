@@ -56,9 +56,6 @@ class StartFragment : Fragment(), View.OnClickListener {
 
         startBtn.setOnClickListener(this)
 
-        viewModel.inputType = inputTypeSpinner.selectedItem.toString()
-        viewModel.activityType = activityTypeSpinner.selectedItem.toString()
-
         return view
     }
 

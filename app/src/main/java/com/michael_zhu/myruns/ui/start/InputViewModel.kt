@@ -1,11 +1,14 @@
 package com.michael_zhu.myruns.ui.start
 
 import androidx.lifecycle.ViewModel
+import com.google.android.gms.maps.model.LatLng
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
+import kotlin.collections.ArrayList
 
 class InputViewModel : ViewModel() {
+    var inputType: String = "GPS"
     var activityType: String = "Running"
     var year: Int = 0
     var month: Int = 0
@@ -25,7 +28,11 @@ class InputViewModel : ViewModel() {
     var calories: Double = 0.0
     var heartRate: Double = 0.0
     var comment: String = ""
+    var latLng: ArrayList<LatLng> = ArrayList()
 
+    /**
+     * Sets the current date and time on creation of viewmodel.
+     */
     init {
         val calendar = Calendar.getInstance()
 

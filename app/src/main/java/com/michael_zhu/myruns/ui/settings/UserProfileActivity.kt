@@ -50,6 +50,10 @@ class UserProfileActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var cancelBtn: Button
     private lateinit var saveBtn: Button
 
+    /**
+     * Sets the view of the activity.
+     * Initializes the view layout widgets.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_profile)
@@ -109,6 +113,9 @@ class UserProfileActivity : AppCompatActivity(), View.OnClickListener {
         loadSettings()
     }
 
+    /**
+     * Determines the actions to take on [v] clicked.
+     */
     override fun onClick(v: View) {
         when (v.id) {
             R.id.cancel_btn -> {
@@ -127,6 +134,9 @@ class UserProfileActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    /**
+     * Determines the intent to launch.
+     */
     private fun onClickProfileBtn() {
         if (Utility.checkPermissions(this)) {
             val builder = AlertDialog.Builder(this)
@@ -149,6 +159,9 @@ class UserProfileActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    /**
+     * Launches a gallery intent.
+     */
     private fun getFromGallery() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
@@ -156,12 +169,18 @@ class UserProfileActivity : AppCompatActivity(), View.OnClickListener {
         galleryResult.launch(intent)
     }
 
+    /**
+     * Launches a camera intent.
+     */
     private fun launchCamera() {
         val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         intent.putExtra(MediaStore.EXTRA_OUTPUT, tmpUri)
         cameraResult.launch(intent)
     }
 
+    /**
+     * Saves the current input.
+     */
     private fun onClickSaveBtn() {
         if (profileChanged) {
             val tmpFile = File(getExternalFilesDir(null), tmpFileName)
@@ -191,6 +210,9 @@ class UserProfileActivity : AppCompatActivity(), View.OnClickListener {
         editor.apply()
     }
 
+    /**
+     * Loads the previously saved user profile data.
+     */
     private fun loadSettings() {
         val profileImageFile = File(getExternalFilesDir(null), tmpFileName)
         val imgUri = FileProvider.getUriForFile(this, "com.michael_zhu.myruns", profileImageFile)

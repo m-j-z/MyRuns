@@ -16,6 +16,9 @@ import kotlin.math.roundToInt
 
 object Utility {
 
+    /**
+     * Checks whether the permission required for the application was granted.
+     */
     fun checkPermissions(context: Context): Boolean {
         if (ContextCompat.checkSelfPermission(
                 context,
@@ -24,9 +27,18 @@ object Utility {
             ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             return true
@@ -34,6 +46,9 @@ object Utility {
         return false
     }
 
+    /**
+     * Returns the bitmap as given by [imgUri] and saves it to [imageFileName].
+     */
     fun getBitmap(context: Context, imgUri: Uri, imageFileName: String): Bitmap {
         val bitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(imgUri))
         val matrix = Matrix()
@@ -41,6 +56,9 @@ object Utility {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
+    /**
+     * Automatically rotates the picture.
+     */
     private fun getRotation(context: Context, imageUri: Uri, imageFileName: String): Float {
         var rotate = 0
         context.contentResolver.notifyChange(imageUri, null)
@@ -60,9 +78,12 @@ object Utility {
         return rotate.toFloat()
     }
 
+    /**
+     * Converts [num] from [savedAsUnits] to [currentUnits].
+     */
     fun convertUnits(currentUnits: String, savedAsUnits: String, num: Double): Double {
         if (currentUnits == savedAsUnits) {
-            return num
+            return (num * 100000.0).roundToInt() / 100000.0
         }
 
         if (currentUnits == "km" && savedAsUnits == "mi") {
@@ -72,12 +93,18 @@ object Utility {
         return (num / 1.609 * 100000.0).roundToInt() / 100000.0
     }
 
+    /**
+     * Converts [long] to a date.
+     */
     fun longToDate(long: Long): String? {
         val date = Date(long)
         val format = SimpleDateFormat("MMM dd yyyy", Locale.CANADA)
         return format.format(date)
     }
 
+    /**
+     * Converts [seconds] to a time.
+     */
     fun longToTime(seconds: Long): String {
         val h = seconds / 3600
         val m = (seconds % 3600) / 60
@@ -85,11 +112,13 @@ object Utility {
         return "%02d:%02d:%02d".format(h, m, s)
     }
 
+    /**
+     * Converts [seconds] to a time.
+     */
     fun longToDuration(seconds: Long): String {
         val h = seconds / 3600
         val m = (seconds % 3600) / 60
         val s = seconds % 60
         return "%02d hours %02d minutes %02d seconds".format(h, m, s)
     }
-
 }

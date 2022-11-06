@@ -9,7 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.michael_zhu.myruns.R
-import com.michael_zhu.myruns.database.*
+import com.michael_zhu.myruns.database.history.*
 import com.michael_zhu.myruns.misc.Utility
 
 class DisplayEntryActivity : AppCompatActivity() {
@@ -22,6 +22,11 @@ class DisplayEntryActivity : AppCompatActivity() {
     private lateinit var historyViewModel: HistoryViewModel
     private lateinit var entry: LiveData<Entry>
 
+    /**
+     * Sets the view of the activity.
+     * Initializes the history database.
+     * Initializes the view layouts widgets and sets the value as determined by the entry.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_display_entry)

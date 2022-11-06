@@ -11,9 +11,8 @@ import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.michael_zhu.myruns.R
-import com.michael_zhu.myruns.ui.start.automatic.AutomaticActivity
-import com.michael_zhu.myruns.ui.start.gps.GPSActivity
 import com.michael_zhu.myruns.ui.start.manual.ManualInputActivity
+import com.michael_zhu.myruns.ui.start.map.MapsDisplayActivity
 
 class StartFragment : Fragment(), View.OnClickListener {
     companion object {
@@ -25,9 +24,12 @@ class StartFragment : Fragment(), View.OnClickListener {
     private lateinit var activityTypeSpinner: Spinner
     private lateinit var startBtn: Button
 
+    /**
+     * Sets the view of the fragment, adds the possible options for input and activity,
+     * and initializes the listeners for the buttons.
+     */
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_start, container, false)
         viewModel = ViewModelProvider(this)[StartViewModel::class.java]
@@ -37,18 +39,14 @@ class StartFragment : Fragment(), View.OnClickListener {
         startBtn = view.findViewById(R.id.start_btn)
 
         ArrayAdapter.createFromResource(
-            requireActivity(),
-            R.array.input_array,
-            android.R.layout.simple_spinner_item
+            requireActivity(), R.array.input_array, android.R.layout.simple_spinner_item
         ).also {
             it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             inputTypeSpinner.adapter = it
         }
 
         ArrayAdapter.createFromResource(
-            requireActivity(),
-            R.array.activity_array,
-            android.R.layout.simple_spinner_item
+            requireActivity(), R.array.activity_array, android.R.layout.simple_spinner_item
         ).also {
             it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             activityTypeSpinner.adapter = it
@@ -59,6 +57,9 @@ class StartFragment : Fragment(), View.OnClickListener {
         return view
     }
 
+    /**
+     * Determines the actions to perform on [v] clicked.
+     */
     override fun onClick(v: View?) {
         if (v == null) {
             return
@@ -70,15 +71,26 @@ class StartFragment : Fragment(), View.OnClickListener {
 
                 when (inputTypeSpinner.selectedItem.toString()) {
                     "Manual" -> startInputActivity(ManualInputActivity::class.java, activityType)
-                    "GPS" -> startInputActivity(GPSActivity::class.java, activityType)
-                    "Automatic" -> startInputActivity(AutomaticActivity::class.java, activityType)
+                    "GPS" -> startInputActivity(
+                        MapsDisplayActivity::class.java, activityType, "GPS"
+                    )
+                    "Automatic" -> startInputActivity(
+                        MapsDisplayActivity::class.java, activityType, "Automatic"
+                    )
                 }
             }
         }
     }
 
-    private fun startInputActivity(java: Class<*>, activityType: String) {
+    /**
+     * Starts a new activity as defined by [java] while passing the type of activity, [activityType],
+     * and the input type, [inputType].
+     */
+    private fun startInputActivity(
+        java: Class<*>, activityType: String, inputType: String = "Manual"
+    ) {
         val intent = Intent(requireActivity(), java)
+        intent.putExtra("input_type", inputType)
         intent.putExtra("activity_type", activityType)
         startActivity(intent)
     }

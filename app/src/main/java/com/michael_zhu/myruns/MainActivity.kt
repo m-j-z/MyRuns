@@ -24,6 +24,9 @@ class MainActivity : AppCompatActivity() {
     )
     private val tabNames = arrayListOf("Start", "History", "Settings")
 
+    /**
+     * Sets the view of the activity, initializes the main UI tabs, and request the required permissions.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -44,7 +47,9 @@ class MainActivity : AppCompatActivity() {
             arrayOf(
                 Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             )
         )
     }

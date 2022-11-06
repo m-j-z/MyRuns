@@ -1,4 +1,4 @@
-package com.michael_zhu.myruns.database
+package com.michael_zhu.myruns.database.history
 
 import androidx.room.Dao
 import androidx.room.Insert

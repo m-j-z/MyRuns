@@ -56,5 +56,7 @@
     <string name="calories_hint">Calories expended</string>
     <string name="heartbeat_hint">Heart rate during activity</string>
     <string name="delete">delete</string>
+    <string name="title_activity_maps_display">MapsDisplayActivity</string>
+    <string name="title_activity_display_maps_entry">DisplayMapsEntryActivity</string>
 
 </resources>

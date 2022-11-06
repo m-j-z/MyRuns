@@ -1,26 +1,26 @@
-package com.michael_zhu.myruns.database
+package com.michael_zhu.myruns.database.location
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Entry::class], version = 1)
-abstract class HistoryDatabase : RoomDatabase() {
-    abstract val historyDatabaseDao: HistoryDatabaseDao
+@Database(entities = [LocationEntry::class], version = 1, exportSchema = false)
+abstract class LocationDatabase : RoomDatabase() {
+    abstract val locationDatabaseDao: LocationDatabaseDao
 
     companion object {
         @Volatile
-        private var INSTANCE: HistoryDatabase? = null
+        private var INSTANCE: LocationDatabase? = null
 
-        fun getInstance(context: Context): HistoryDatabase {
+        fun getInstance(context: Context): LocationDatabase {
             synchronized(this) {
                 var instance = INSTANCE
                 if (instance == null) {
                     instance = Room.databaseBuilder(
                         context.applicationContext,
-                        HistoryDatabase::class.java,
-                        "historyDB"
+                        LocationDatabase::class.java,
+                        "locationDB"
                     ).build()
                     INSTANCE = instance
                 }

@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.michael_zhu.myruns.R
-import com.michael_zhu.myruns.database.*
+import com.michael_zhu.myruns.database.history.*
 import com.michael_zhu.myruns.ui.start.InputViewModel
 import com.michael_zhu.myruns.ui.start.manual.dialogs.DateDialogListener
 import com.michael_zhu.myruns.ui.start.manual.dialogs.RotatableDatePickerDialog
@@ -27,6 +27,11 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var historyViewModelFactory: HistoryViewModelFactory
     private lateinit var historyViewModel: HistoryViewModel
 
+    /**
+     * Sets the view of the activity.
+     * Reads the activity type.
+     * Initializes the list view, buttons and history database.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_manual_input)
@@ -61,6 +66,9 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         saveBtn.setOnClickListener(this)
     }
 
+    /**
+     * Creates the comment dialog.
+     */
     private fun onCommentClicked() {
         val dialogView = layoutInflater.inflate(
             R.layout.comment_dialog,
@@ -82,6 +90,9 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         createDialog("Enter any comments.", dialogView, listener)
     }
 
+    /**
+     * Creates the heartbeat dialog.
+     */
     private fun onHeartbeatClicked() {
         val dialogView = layoutInflater.inflate(
             R.layout.heart_rate_dialog,
@@ -107,6 +118,9 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         createDialog("Enter your heart rate.", dialogView, listener)
     }
 
+    /**
+     * Creates the calories dialog.
+     */
     private fun onCaloriesClicked() {
         val dialogView = layoutInflater.inflate(
             R.layout.calories_dialog,
@@ -133,6 +147,9 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         createDialog("Enter the calories burnt.", dialogView, listener)
     }
 
+    /**
+     * Creates the distance dialog.
+     */
     private fun onDistanceClicked() {
         val dialogView = layoutInflater.inflate(
             R.layout.distance_dialog,
@@ -166,6 +183,9 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         createDialog("Enter the distance traveled.", dialogView, listener)
     }
 
+    /**
+     * Creates the duration dialog.
+     */
     private fun onDurationClicked() {
         val dialogView = layoutInflater.inflate(
             R.layout.duration_dialog,
@@ -211,6 +231,9 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         createDialog("Enter duration of activity.", dialogView, listener)
     }
 
+    /**
+     * Creates the time picker dialog.
+     */
     private fun onTimeClicked() {
         val dialog = RotatableTimePickerDialog()
         val listener = TimeDialogListener()
@@ -225,6 +248,9 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         dialog.show(supportFragmentManager, "time_picker")
     }
 
+    /**
+     * Creates the date dialog.
+     */
     private fun onDateClicked() {
         val dialog = RotatableDatePickerDialog()
         val listener = DateDialogListener()
@@ -240,6 +266,9 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         dialog.show(supportFragmentManager, "date_picker")
     }
 
+    /**
+     * Dialog constructor.
+     */
     private fun createDialog(
         dialogTitle: String,
         dialogLayout: View,
@@ -255,6 +284,9 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         builder.show()
     }
 
+    /**
+     * Determines the actions required on [v] clicked.
+     */
     override fun onClick(v: View?) {
         if (v == null) {
             return
@@ -273,6 +305,9 @@ class ManualInputActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    /**
+     * Create and saves a new entry into the history database.
+     */
     private fun saveNewEntry() {
         val preference = PreferenceManager.getDefaultSharedPreferences(this)
         val unitPref = preference.getString("unit_preference", "km").toString()

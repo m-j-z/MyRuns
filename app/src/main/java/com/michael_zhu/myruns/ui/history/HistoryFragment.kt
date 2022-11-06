@@ -9,7 +9,7 @@ import android.widget.ListView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.michael_zhu.myruns.R
-import com.michael_zhu.myruns.database.*
+import com.michael_zhu.myruns.database.history.*
 
 class HistoryFragment : Fragment() {
     companion object {
@@ -23,6 +23,11 @@ class HistoryFragment : Fragment() {
     private lateinit var historyViewModelFactory: HistoryViewModelFactory
     private lateinit var historyViewModel: HistoryViewModel
 
+    /**
+     * Sets the view of the fragment.
+     * Initializes the history database.
+     * Initializes the list view.
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -41,9 +46,11 @@ class HistoryFragment : Fragment() {
 
         listView.setOnItemClickListener { parent, _, position, _ ->
             val entry = parent.adapter.getItem(position) as Entry
-            val intent = Intent(requireActivity(), DisplayEntryActivity::class.java)
-            intent.putExtra("id", entry.id)
-            startActivity(intent)
+            if (entry.inputType == "Manual") {
+                startDisplayActivity(DisplayEntryActivity::class.java, entry.id)
+            } else {
+                startDisplayActivity(DisplayMapsEntryActivity::class.java, entry.id)
+            }
         }
 
         historyViewModel.historyLiveData.observe(requireActivity()) {
@@ -53,6 +60,12 @@ class HistoryFragment : Fragment() {
         }
 
         return view
+    }
+
+    private fun startDisplayActivity(java: Class<*>, id: Long) {
+        val intent = Intent(requireActivity(), java)
+        intent.putExtra("id", id)
+        startActivity(intent)
     }
 
     override fun onResume() {

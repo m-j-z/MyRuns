@@ -30,4 +30,10 @@ class HistoryRepository(private val historyDatabaseDao: HistoryDatabaseDao) {
         return historyDatabaseDao.getEntry(id)
     }
 
+    /**
+     * Gets the last inserted entry's id
+     */
+    fun getLastEntryId(): Flow<Long> {
+        return historyDatabaseDao.getLastEntryId()
+    }
 }

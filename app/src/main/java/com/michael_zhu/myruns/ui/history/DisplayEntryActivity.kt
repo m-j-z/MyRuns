@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
@@ -61,7 +62,8 @@ class DisplayEntryActivity : AppCompatActivity() {
             val date = Utility.longToDate(it.date)
             val time = Utility.longToTime(it.time)
             val datetime = "$time $date"
-            val distance = Utility.convertUnits(unitPref, it.unitSavedAs, it.distance).toString() + " $unitPref"
+            val distance = Utility.convertUnits(unitPref, it.unitSavedAs, it.distance)
+                .toString() + " $unitPref"
             val calories = it.calories.toString() + " cal"
             val heartRate = it.heartRate.toString() + " bpm"
 
@@ -85,6 +87,7 @@ class DisplayEntryActivity : AppCompatActivity() {
             R.id.delete -> {
                 entry.removeObservers(this)
                 historyViewModel.delete(id)
+                Toast.makeText(this, "Removed entry with ID $id.", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }

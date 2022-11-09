@@ -12,7 +12,6 @@ import androidx.core.content.ContextCompat
 import androidx.exifinterface.media.ExifInterface
 import java.io.File
 import java.util.*
-import kotlin.math.roundToInt
 
 object Utility {
 
@@ -83,14 +82,14 @@ object Utility {
      */
     fun convertUnits(currentUnits: String, savedAsUnits: String, num: Double): Double {
         if (currentUnits == savedAsUnits) {
-            return (num * 100000.0).roundToInt() / 100000.0
+            return roundToDecimalPlaces(num, 5)
         }
 
         if (currentUnits == "km" && savedAsUnits == "mi") {
-            return (num * 1.609 * 100000.0).roundToInt() / 100000.0
+            return roundToDecimalPlaces(num * 1.609, 5)
         }
 
-        return (num / 1.609 * 100000.0).roundToInt() / 100000.0
+        return roundToDecimalPlaces(num / 1.609, 5)
     }
 
     /**
@@ -120,5 +119,16 @@ object Utility {
         val m = (seconds % 3600) / 60
         val s = seconds % 60
         return "%02d hours %02d minutes %02d seconds".format(h, m, s)
+    }
+
+    /**
+     * Rounds and returns [num] to [numOfDecimalPlaces].
+     */
+    fun roundToDecimalPlaces(num: Double, numOfDecimalPlaces: Int = 1): Double {
+        var tens = 1.0
+        for (i in 1..numOfDecimalPlaces) {
+            tens *= 10.0
+        }
+        return (num * tens).toInt() / tens
     }
 }

@@ -1,10 +1,9 @@
 package com.michael_zhu.myruns.database.location
 
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "location_entry", indices = [Index(value = ["entryId"], unique = true)])
+@Entity(tableName = "location_entry")
 data class LocationEntry(
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0,

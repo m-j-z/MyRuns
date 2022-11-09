@@ -27,4 +27,11 @@ class HistoryViewModel(private val historyRepository: HistoryRepository): ViewMo
     fun getEntry(id: Long): LiveData<Entry> {
         return historyRepository.getEntry(id).asLiveData()
     }
+
+    /**
+     * Gets the last inserted entry's id
+     */
+    fun getLastEntryId(): LiveData<Long> {
+        return historyRepository.getLastEntryId().asLiveData()
+    }
 }

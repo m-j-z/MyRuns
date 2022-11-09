@@ -18,5 +18,6 @@ data class Entry(
     var distance: Double = 0.0,
     var calories: Double = 0.0,
     var heartRate: Double = 0.0,
-    var comment: String = ""
+    var comment: String = "",
+    var climb: Double = 0.0
 )

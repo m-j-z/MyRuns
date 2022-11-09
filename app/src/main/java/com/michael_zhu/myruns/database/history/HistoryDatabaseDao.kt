@@ -18,4 +18,7 @@ interface HistoryDatabaseDao {
 
     @Query("SELECT * FROM activity_entry WHERE id = :id")
     fun getEntry(id: Long): Flow<Entry>
+
+    @Query("SELECT id FROM activity_entry ORDER BY id DESC LIMIT 1")
+    fun getLastEntryId(): Flow<Long>
 }

@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.michael_zhu.myruns.R
 import com.michael_zhu.myruns.database.history.*
+import com.michael_zhu.myruns.ui.start.map.MapsDisplayActivity
 
 class HistoryFragment : Fragment() {
     companion object {
@@ -49,7 +50,7 @@ class HistoryFragment : Fragment() {
             if (entry.inputType == "Manual") {
                 startDisplayActivity(DisplayEntryActivity::class.java, entry.id)
             } else {
-                startDisplayActivity(DisplayMapsEntryActivity::class.java, entry.id)
+                startDisplayActivity(MapsDisplayActivity::class.java, entry.id)
             }
         }
 

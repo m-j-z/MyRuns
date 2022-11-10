@@ -13,6 +13,6 @@ interface LocationDatabaseDao {
     @Query("DELETE FROM location_entry WHERE entryId = :entryId")
     fun deleteLocationEntries(entryId: Long)
 
-    @Query("SELECT * FROM location_entry WHERE entryId = :entryId")
+    @Query("SELECT * FROM location_entry WHERE entryId = :entryId ORDER BY id ASC")
     fun getLocations(entryId: Long): Flow<List<LocationEntry>>
 }

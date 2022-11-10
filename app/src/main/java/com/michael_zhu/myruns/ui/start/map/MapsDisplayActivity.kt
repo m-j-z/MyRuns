@@ -1,11 +1,11 @@
 package com.michael_zhu.myruns.ui.start.map
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
-import android.location.LocationManager
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.Menu
@@ -15,8 +15,10 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -28,6 +30,7 @@ import com.michael_zhu.myruns.database.location.*
 import com.michael_zhu.myruns.databinding.ActivityMapsDisplayBinding
 import com.michael_zhu.myruns.misc.Utility
 import com.michael_zhu.myruns.ui.start.InputViewModel
+import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
@@ -35,8 +38,8 @@ import kotlin.math.abs
 
 class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickListener {
     private var isBind: Boolean = false
-    private var lastUpdate: Double = 0.0
-    private var prevClimb: Double = 0.0
+    private var inserted: Boolean = false
+    private var i: Long = 1
 
     private lateinit var appContext: Context
     private lateinit var trackingViewModel: TrackingViewModel
@@ -67,7 +70,7 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
     private var id: Long = -1
     private lateinit var locationList: LiveData<List<LocationEntry>>
     private lateinit var entry: LiveData<Entry>
-    private lateinit var lastEntry: LiveData<Long>
+    private lateinit var lastEntry: Flow<Long>
 
     /**
      * Sets the view of the activity, initializes the map, creates the input view model,
@@ -125,7 +128,7 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
     private fun recalculateStats(entry: Entry?) {
         if (entry == null) return
 
-        val avgSpeed = Utility.roundToDecimalPlaces(entry.distance / entry.duration, 5)
+        val avgSpeed = entry.distance / entry.duration
         val entryStatistics = EntryStatistics(this)
         entryStatistics.apply {
             setActivityType(entry.activityType)
@@ -187,7 +190,27 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
         saveBtn.setOnClickListener(this)
 
         trackingViewModel.latLngList.observe(this) {
-            if (it.isNotEmpty()) {
+            if (it.size == 1) {
+                val location = it.first()
+                val latLng = LatLng(location.latitude, location.longitude)
+                mMap.addMarker(
+                    markerOptions.position(latLng)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                )
+
+                polylineOptions.add(latLng)
+                mMap.addPolyline(polylineOptions)
+
+                prevMarker = mMap.addMarker(
+                    markerOptions.position(latLng)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                )!!
+
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17f)
+                mMap.animateCamera(cameraUpdate)
+            }
+
+            if (it.isNotEmpty() && it.size > 1) {
                 val location = it.last()
                 val latLng = LatLng(location.latitude, location.longitude)
 
@@ -208,9 +231,15 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
             }
         }
 
-        intent.action = TrackingService.START
-        startService(intent)
-        bindService()
+        if (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            startService(intent)
+            bindService()
+        }
     }
 
     private fun calculateStats(locations: ArrayList<Location>?) {
@@ -221,27 +250,27 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
 
         val totalDuration = getDuration()
         val totalDistance = getDistance(locations)
-        val avgSpeed = Utility.roundToDecimalPlaces((totalDistance / totalDuration) * 3600, 5)
+        val avgSpeed = totalDistance / totalDuration * 3600
 
-        val duration = Utility.roundToDecimalPlaces(totalDuration - lastUpdate, 5)
-        val distance = Utility.roundToDecimalPlaces(
-            (prevLocation.distanceTo(currLocation) / 1000).toDouble(),
-            5
-        )
-        val curSpeed = Utility.roundToDecimalPlaces((distance / duration) * 3600, 5)
-        lastUpdate = duration
 
+        var duration = totalDuration - inputViewModel.duration
+        if (duration == 0.0) {
+            duration = 1.0
+        }
+        val distance = prevLocation.distanceTo(currLocation) / 1000
+        val curSpeed = distance / duration * 3600
+
+        inputViewModel.duration = totalDuration
+        inputViewModel.distance = totalDistance
         inputViewModel.calories += 0.1 * curSpeed
-
-        prevClimb += abs(currLocation.altitude - prevLocation.altitude) / 1000
-        inputViewModel.climb = prevClimb
+        inputViewModel.climb += abs(currLocation.altitude - prevLocation.altitude) / 1000
 
         val stats = EntryStatistics(this).apply {
             setActivityType(inputViewModel.activityType)
             setAverageSpeed(avgSpeed)
             setCurrentSpeed(curSpeed)
-            setCalories(Utility.roundToDecimalPlaces(inputViewModel.calories, 5))
-            setClimb(Utility.roundToDecimalPlaces(prevClimb, 5))
+            setCalories(inputViewModel.calories)
+            setClimb(inputViewModel.climb)
             setDistance(totalDistance)
         }
 
@@ -282,36 +311,6 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
         }
 
         return Utility.roundToDecimalPlaces(totalDistance / 1000, 5)
-    }
-
-    /**
-     * Gets the starting location of the activity.
-     */
-    @SuppressLint("MissingPermission")
-    private fun getStartingLocation(addStart: Boolean = true) {
-        val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-
-        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) ?: return
-
-        val latLng = LatLng(location.latitude, location.longitude)
-
-        if (addStart) {
-            mMap.addMarker(
-                markerOptions.position(latLng)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-            )
-        }
-
-        polylineOptions.add(latLng)
-        mMap.addPolyline(polylineOptions)
-
-        prevMarker = mMap.addMarker(
-            markerOptions.position(latLng)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-        )!!
-
-        trackingViewModel.add(location)
-        recordEntry()
     }
 
     /**
@@ -359,9 +358,8 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
             val latLngList = trackingViewModel.getAll()
             if (latLngList.isNotEmpty()) {
                 recreateLiveList(latLngList)
-            } else {
-                getStartingLocation()
             }
+            recordEntry()
         }
     }
 
@@ -440,8 +438,10 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
 
         historyViewModel.insert(entry)
         lastEntry = historyViewModel.getLastEntryId()
-        lastEntry.observe(this) {
-            insertIntoLocationDatabase(it)
+        lastEntry.asLiveData().observe(this) {
+            if (it != null && !inserted) {
+                insertIntoLocationDatabase(it)
+            }
         }
     }
 
@@ -450,13 +450,12 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
 
         locationList.forEach {
             val locationEntry = LocationEntry(
-                entryId = entryId,
-                lat = it.latitude,
-                lon = it.longitude
+                id = i, entryId = entryId, lat = it.latitude, lon = it.longitude
             )
             locationViewModel.insertLocationEntry(locationEntry)
+            i += 1
         }
-        lastEntry.removeObservers(this)
+        inserted = true
     }
 
     /**

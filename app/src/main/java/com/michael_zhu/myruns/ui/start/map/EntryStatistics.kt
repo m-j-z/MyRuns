@@ -2,6 +2,7 @@ package com.michael_zhu.myruns.ui.start.map
 
 import android.content.Context
 import androidx.preference.PreferenceManager
+import com.michael_zhu.myruns.misc.Utility
 
 class EntryStatistics(context: Context) {
     private var unitPref = "km"
@@ -25,23 +26,23 @@ class EntryStatistics(context: Context) {
     }
 
     fun setAverageSpeed(avgSpeed: Double) {
-        _avgSpeed = avgSpeed
+        _avgSpeed = Utility.convertUnits(unitPref, "km", avgSpeed)
     }
 
     fun setCurrentSpeed(curSpeed: Double) {
-        _curSpeed = curSpeed
+        _curSpeed = Utility.convertUnits(unitPref, "km", curSpeed)
     }
 
     fun setCalories(calories: Double) {
-        _calories = calories
+        _calories = Utility.roundToDecimalPlaces(calories, 5)
     }
 
     fun setClimb(climb: Double) {
-        _climb = climb
+        _climb = Utility.convertUnits(unitPref, "km", climb)
     }
 
     fun setDistance(distance: Double) {
-        _distance = distance
+        _distance = Utility.convertUnits(unitPref, "km", distance)
     }
 
     fun getStats(): String {

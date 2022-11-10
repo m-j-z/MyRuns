@@ -3,6 +3,7 @@ package com.michael_zhu.myruns.database.history
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import kotlinx.coroutines.flow.Flow
 
 class HistoryViewModel(private val historyRepository: HistoryRepository): ViewModel() {
     val historyLiveData = historyRepository.history.asLiveData()
@@ -31,7 +32,7 @@ class HistoryViewModel(private val historyRepository: HistoryRepository): ViewMo
     /**
      * Gets the last inserted entry's id
      */
-    fun getLastEntryId(): LiveData<Long> {
-        return historyRepository.getLastEntryId().asLiveData()
+    fun getLastEntryId(): Flow<Long> {
+        return historyRepository.getLastEntryId()
     }
 }

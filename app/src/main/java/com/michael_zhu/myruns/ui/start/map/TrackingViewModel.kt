@@ -21,7 +21,7 @@ class TrackingViewModel : ViewModel(), ServiceConnection {
     fun add(location: Location) {
         _latLngList = latLngList.value!!
         _latLngList.add(location)
-        latLngList.value = _latLngList
+        latLngList.postValue(_latLngList)
     }
 
     fun getAll(): ArrayList<Location> {

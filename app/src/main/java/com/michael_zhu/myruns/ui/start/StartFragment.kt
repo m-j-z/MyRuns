@@ -1,6 +1,8 @@
 package com.michael_zhu.myruns.ui.start
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.michael_zhu.myruns.R
@@ -18,6 +22,9 @@ class StartFragment : Fragment(), View.OnClickListener {
     companion object {
         fun newInstance() = StartFragment()
     }
+
+    private val requestMultiplePermissions =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {}
 
     private lateinit var viewModel: StartViewModel
     private lateinit var inputTypeSpinner: Spinner
@@ -71,12 +78,20 @@ class StartFragment : Fragment(), View.OnClickListener {
 
                 when (inputTypeSpinner.selectedItem.toString()) {
                     "Manual" -> startInputActivity(ManualInputActivity::class.java, activityType)
-                    "GPS" -> startInputActivity(
-                        MapsDisplayActivity::class.java, activityType, "GPS"
-                    )
-                    "Automatic" -> startInputActivity(
-                        MapsDisplayActivity::class.java, activityType, "Automatic"
-                    )
+                    "GPS" -> {
+                        if (checkPermissions()) {
+                            startInputActivity(
+                                MapsDisplayActivity::class.java, activityType, "GPS"
+                            )
+                        }
+                    }
+                    "Automatic" -> {
+                        if (checkPermissions()) {
+                            startInputActivity(
+                                MapsDisplayActivity::class.java, activityType, "Automatic"
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -93,5 +108,24 @@ class StartFragment : Fragment(), View.OnClickListener {
         intent.putExtra("input_type", inputType)
         intent.putExtra("activity_type", activityType)
         startActivity(intent)
+    }
+
+    private fun checkPermissions(): Boolean {
+        if (ContextCompat.checkSelfPermission(
+                requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                requireActivity(), Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            return true
+        } else {
+            requestMultiplePermissions.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+        return false
     }
 }

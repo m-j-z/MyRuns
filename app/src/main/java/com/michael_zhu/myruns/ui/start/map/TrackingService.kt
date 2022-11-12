@@ -19,12 +19,18 @@ class TrackingService : Service(), LocationListener {
     private lateinit var locationManager: LocationManager
     private var msgHandler: Handler? = null
 
+    override fun onCreate() {
+        super.onCreate()
+        sendNotification()
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         start()
         return START_NOT_STICKY
     }
 
     private fun start() {
+
         initializeLocationManager()
     }
 
@@ -42,10 +48,12 @@ class TrackingService : Service(), LocationListener {
     }
 
     private fun sendNotification() {
-        val intent = Intent(this, MapsDisplayActivity::class.java)
+        val intent = Intent(applicationContext, MapsDisplayActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         val notification = NotificationCompat.Builder(this, CHANNEL_ID).apply {
+            setCategory(NotificationCompat.CATEGORY_SERVICE)
+            priority = NotificationCompat.PRIORITY_DEFAULT
             setContentTitle("MyRuns: Tracking Location")
             setContentText("MyRuns is currently tracking your location.")
             setSmallIcon(R.drawable.gps_icon)
@@ -58,12 +66,11 @@ class TrackingService : Service(), LocationListener {
             CHANNEL_ID, NOTIFICATION_NAME, NotificationManager.IMPORTANCE_DEFAULT
         )
         notificationManager.createNotificationChannel(notificationChannel)
-
+        startForeground(NOTIFICATION_ID, notification.build())
         notificationManager.notify(NOTIFICATION_ID, notification.build())
     }
 
     override fun onBind(intent: Intent): IBinder {
-        sendNotification()
         trackingBinder = TrackingBinder()
         return trackingBinder
     }
@@ -99,8 +106,10 @@ class TrackingService : Service(), LocationListener {
     }
 
     inner class TrackingBinder : Binder() {
+        private val service: TrackingService get() = this@TrackingService
+
         fun setLocationHandler(msgHandler: Handler) {
-            this@TrackingService.msgHandler = msgHandler
+            service.msgHandler = msgHandler
         }
     }
 

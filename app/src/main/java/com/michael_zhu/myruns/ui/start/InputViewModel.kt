@@ -6,6 +6,7 @@ import java.time.ZoneId
 import java.util.*
 
 class InputViewModel : ViewModel() {
+    var id: Long = -1
     var inputType: String = "GPS"
     var activityType: String = "Running"
     var year: Int = 0

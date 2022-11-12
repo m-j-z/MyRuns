@@ -49,8 +49,24 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_COARSE_LOCATION,
             )
         )
+
+        if (android.os.Build.VERSION.SDK_INT >= 28) {
+            requestMultiplePermissions.launch(
+                arrayOf(
+                    Manifest.permission.FOREGROUND_SERVICE
+                )
+            )
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            requestMultiplePermissions.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                )
+            )
+        }
     }
 }

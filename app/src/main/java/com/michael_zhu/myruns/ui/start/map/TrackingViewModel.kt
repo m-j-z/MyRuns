@@ -7,6 +7,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
@@ -30,11 +31,13 @@ class TrackingViewModel : ViewModel(), ServiceConnection {
     }
 
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+        Log.d("Location Service", "Service connected.")
         val binder = service as TrackingService.TrackingBinder
         binder.setLocationHandler(trackingHandler)
     }
 
     override fun onServiceDisconnected(name: ComponentName?) {
+        Log.d("LocationService", "Service disconnected.")
         return
     }
 

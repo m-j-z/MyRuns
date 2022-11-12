@@ -67,7 +67,6 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
     private lateinit var prevMarker: Marker
     private lateinit var markerOptions: MarkerOptions
 
-    private var id: Long = -1
     private lateinit var locationList: LiveData<List<LocationEntry>>
     private lateinit var entry: LiveData<Entry>
     private lateinit var lastEntry: Flow<Long>
@@ -96,7 +95,7 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
 
         val extras = intent.extras
         if (extras != null) {
-            id = extras.getLong("id", -1)
+            inputViewModel.id = extras.getLong("id", -1)
             inputViewModel.inputType = extras.getString("input_type", "GPS")
             inputViewModel.activityType = extras.getString("activity_type", "Running")
         }
@@ -110,8 +109,8 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
      * Initializes and starts reproducing an activity Entry.
      */
     private fun displayEntry() {
-        locationList = locationViewModel.getLocations(id)
-        entry = historyViewModel.getEntry(id)
+        locationList = locationViewModel.getLocations(inputViewModel.id)
+        entry = historyViewModel.getEntry(inputViewModel.id)
 
         locationList.observe(this) {
             recreateMap(it)
@@ -262,7 +261,7 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
 
         inputViewModel.duration = totalDuration
         inputViewModel.distance = totalDistance
-        inputViewModel.calories += 0.1 * curSpeed
+        inputViewModel.calories += 0.05 * curSpeed
         inputViewModel.climb += abs(currLocation.altitude - prevLocation.altitude) / 1000
 
         val stats = EntryStatistics(this).apply {
@@ -349,7 +348,7 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
         polylineOptions = PolylineOptions()
         polylineOptions.color(Color.BLACK)
 
-        if (id != -1L) {
+        if (inputViewModel.id != -1L) {
             displayEntry()
         } else {
             appContext = applicationContext
@@ -482,7 +481,7 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
      * Add 'DELETE' to menu if entry is to be recreated.
      */
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        if (id != -1L) {
+        if (inputViewModel.id != -1L) {
             menuInflater.inflate(R.menu.display_entry_menu, menu)
         }
         return super.onCreateOptionsMenu(menu)
@@ -495,10 +494,10 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
         when (item.itemId) {
             R.id.delete -> {
                 locationList.removeObservers(this)
-                locationViewModel.deleteLocations(id)
+                locationViewModel.deleteLocations(inputViewModel.id)
                 entry.removeObservers(this)
-                historyViewModel.delete(id)
-                Toast.makeText(this, "Removed entry with ID $id.", Toast.LENGTH_SHORT).show()
+                historyViewModel.delete(inputViewModel.id)
+                Toast.makeText(this, "Removed entry with ID ${inputViewModel.id}.", Toast.LENGTH_SHORT).show()
                 finish()
             }
         }

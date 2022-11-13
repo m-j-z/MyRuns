@@ -16,6 +16,9 @@ class EntryStatistics(context: Context) {
 
     private var stats = ""
 
+    /**
+     * Get unit preference.
+     */
     init {
         val preferences = PreferenceManager.getDefaultSharedPreferences(context)
         unitPref = preferences.getString("unit_preference", "km").toString()

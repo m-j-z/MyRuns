@@ -19,23 +19,35 @@ class TrackingViewModel : ViewModel(), ServiceConnection {
         arrayListOf()
     )
 
+    /**
+     * Add [location] to [latLngList].
+     */
     fun add(location: Location) {
         _latLngList = latLngList.value!!
         _latLngList.add(location)
         latLngList.postValue(_latLngList)
     }
 
+    /**
+     * Return [latLngList].
+     */
     fun getAll(): ArrayList<Location> {
         _latLngList = latLngList.value!!
         return _latLngList
     }
 
+    /**
+     * On service connection, bind handler.
+     */
     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
         Log.d("Location Service", "Service connected.")
         val binder = service as TrackingService.TrackingBinder
         binder.setLocationHandler(trackingHandler)
     }
 
+    /**
+     * On service disconnection.
+     */
     override fun onServiceDisconnected(name: ComponentName?) {
         Log.d("LocationService", "Service disconnected.")
         return

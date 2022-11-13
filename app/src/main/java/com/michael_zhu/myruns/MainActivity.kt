@@ -31,6 +31,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        createUiTabs()
+        requestPermissions()
+    }
+
+    /**
+     * Create main tabs.
+     */
+    private fun createUiTabs() {
         tabLayout = findViewById(R.id.tabLayout)
         viewPager = findViewById(R.id.viewPager)
 
@@ -42,7 +50,12 @@ class MainActivity : AppCompatActivity() {
         TabLayoutMediator(tabLayout, viewPager) { tab: TabLayout.Tab, i: Int ->
             tab.text = adapter.getTitle(i)
         }.attach()
+    }
 
+    /**
+     * Requests the required permissions to run the app as specified by AndroidManifest.xml.
+     */
+    private fun requestPermissions() {
         requestMultiplePermissions.launch(
             arrayOf(
                 Manifest.permission.CAMERA,

@@ -215,8 +215,10 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
 
                 prevMarker.remove()
 
-                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17f)
-                mMap.animateCamera(cameraUpdate)
+                if (!mMap.projection.visibleRegion.latLngBounds.contains(latLng)) {
+                    val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17f)
+                    mMap.animateCamera(cameraUpdate)
+                }
 
                 polylineOptions.add(latLng)
                 mMap.addPolyline(polylineOptions)
@@ -371,6 +373,8 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
     private fun recreateLiveList(latLngList: ArrayList<Location>) {
         if (latLngList.isEmpty()) return
 
+        polylineOptions = PolylineOptions()
+
         val firstEntry = latLngList.first()
         val firstLoc = LatLng(firstEntry.latitude, firstEntry.longitude)
         mMap.addMarker(
@@ -395,7 +399,6 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
             )!!
         }
-        recordEntry()
     }
 
     /**
@@ -506,7 +509,11 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
                 locationViewModel.deleteLocations(inputViewModel.id)
                 entry.removeObservers(this)
                 historyViewModel.delete(inputViewModel.id)
-                Toast.makeText(this, "Removed entry with ID ${inputViewModel.id}.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Removed entry with ID ${inputViewModel.id}.",
+                    Toast.LENGTH_SHORT
+                ).show()
                 finish()
             }
         }
@@ -519,6 +526,15 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
         outState.putBoolean(BIND_STATUS_KEY, isBind)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val latLngList = trackingViewModel.getAll()
+        if (latLngList.isNotEmpty() && this::mMap.isInitialized) {
+            mMap.clear()
+            recreateLiveList(latLngList)
+        }
     }
 
     companion object {

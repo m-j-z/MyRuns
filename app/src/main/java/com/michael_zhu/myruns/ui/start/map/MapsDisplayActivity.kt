@@ -241,6 +241,9 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
         }
     }
 
+    /**
+     * Calculates stats dependent on the previous location and current location.
+     */
     private fun calculateStats(locations: ArrayList<Location>?) {
         if (locations == null || locations.isEmpty() || locations.size < 2) return
 
@@ -420,6 +423,9 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
         }
     }
 
+    /**
+     * Create a new entry and save it to database.
+     */
     private fun saveEntry() {
         inputViewModel.duration = getDuration()
         inputViewModel.distance = getDistance(trackingViewModel.getAll())
@@ -444,6 +450,9 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
         }
     }
 
+    /**
+     * Insert route data into the database with reference to [entryId].
+     */
     private fun insertIntoLocationDatabase(entryId: Long) {
         val locationList = trackingViewModel.getAll()
 

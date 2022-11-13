@@ -19,21 +19,28 @@ class TrackingService : Service(), LocationListener {
     private lateinit var locationManager: LocationManager
     private var msgHandler: Handler? = null
 
-    override fun onCreate() {
-        super.onCreate()
-        sendNotification()
-    }
-
+    /**
+     * On StartService
+     */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         start()
         return START_NOT_STICKY
     }
 
+    /**
+     * Send notification.
+     * Initialize Location Manager.
+     */
     private fun start() {
-
+        sendNotification()
         initializeLocationManager()
     }
 
+    /**
+     * Initialize Location Manager.
+     * Get last known location.
+     * Request location updates.
+     */
     @SuppressLint("MissingPermission")
     private fun initializeLocationManager() {
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
@@ -47,6 +54,10 @@ class TrackingService : Service(), LocationListener {
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, this)
     }
 
+    /**
+     * Create notification.
+     * Create notification channel.
+     */
     private fun sendNotification() {
         val intent = Intent(applicationContext, MapsDisplayActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -66,15 +77,20 @@ class TrackingService : Service(), LocationListener {
             CHANNEL_ID, NOTIFICATION_NAME, NotificationManager.IMPORTANCE_DEFAULT
         )
         notificationManager.createNotificationChannel(notificationChannel)
-        startForeground(NOTIFICATION_ID, notification.build())
         notificationManager.notify(NOTIFICATION_ID, notification.build())
     }
 
+    /**
+     * On Bind, create TrackingBinder.
+     */
     override fun onBind(intent: Intent): IBinder {
         trackingBinder = TrackingBinder()
         return trackingBinder
     }
 
+    /**
+     * On Unbind, set [msgHandler] and cancel notification and remove updates for location manager.
+     */
     override fun onUnbind(intent: Intent?): Boolean {
         msgHandler = null
         notificationManager.cancel(NOTIFICATION_ID)
@@ -82,11 +98,17 @@ class TrackingService : Service(), LocationListener {
         return super.onUnbind(intent)
     }
 
+    /**
+     * Stop service onTaskRemoved.
+     */
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         stopSelf()
     }
 
+    /**
+     * On location changed, send message to binder.
+     */
     override fun onLocationChanged(location: Location) {
         val bundle = Bundle()
         bundle.putParcelable(BUNDLE_NAME_LOCATION, location)
@@ -98,8 +120,13 @@ class TrackingService : Service(), LocationListener {
         }
     }
 
+    /**
+     * OnDestroy, set [msgHandler] and cancel notification and remove updates for location manager.
+     * Stop service.
+     */
     override fun onDestroy() {
         super.onDestroy()
+        msgHandler = null
         notificationManager.cancel(NOTIFICATION_ID)
         locationManager.removeUpdates(this)
         stopSelf()

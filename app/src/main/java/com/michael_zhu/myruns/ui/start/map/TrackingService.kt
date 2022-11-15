@@ -44,13 +44,13 @@ class TrackingService : Service(), LocationListener {
     @SuppressLint("MissingPermission")
     private fun initializeLocationManager() {
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-        locationManager.removeUpdates(this)
 
         val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
         if (location != null) {
             onLocationChanged(location)
         }
 
+        locationManager.removeUpdates(this)
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, this)
     }
 

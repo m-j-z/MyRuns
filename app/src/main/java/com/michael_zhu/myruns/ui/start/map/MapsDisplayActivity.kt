@@ -113,6 +113,12 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
         entry = historyViewModel.getEntry(inputViewModel.id)
 
         locationList.observe(this) {
+            mMap.moveCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(it.last().lat, it.last().lon),
+                    17f
+                )
+            )
             recreateMap(it)
         }
 
@@ -361,6 +367,14 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
 
             val latLngList = trackingViewModel.getAll()
             if (latLngList.isNotEmpty()) {
+                mMap.moveCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        LatLng(
+                            latLngList.last().latitude,
+                            latLngList.last().longitude
+                        ), 17f
+                    )
+                )
                 recreateLiveList(latLngList)
             }
             recordEntry()

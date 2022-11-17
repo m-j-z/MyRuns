@@ -88,7 +88,7 @@ class StartFragment : Fragment(), View.OnClickListener {
                     "Automatic" -> {
                         if (checkPermissions()) {
                             startInputActivity(
-                                MapsDisplayActivity::class.java, activityType, "Automatic"
+                                MapsDisplayActivity::class.java, "Unknown", "Automatic"
                             )
                         }
                     }

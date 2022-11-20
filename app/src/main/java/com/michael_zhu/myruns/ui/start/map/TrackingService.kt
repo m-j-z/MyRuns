@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.location.Criteria
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -52,13 +53,22 @@ class TrackingService : Service(), LocationListener {
     private fun initializeLocationManager() {
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
 
-        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+        val criteria = Criteria().apply {
+            accuracy = Criteria.ACCURACY_FINE
+            powerRequirement = Criteria.POWER_HIGH
+            horizontalAccuracy = Criteria.ACCURACY_HIGH
+            verticalAccuracy = Criteria.ACCURACY_HIGH
+        }
+        var provider = locationManager.getBestProvider(criteria, true)
+        if (provider == null) provider = LocationManager.GPS_PROVIDER
+
+        val location = locationManager.getLastKnownLocation(provider)
         if (location != null) {
             onLocationChanged(location)
         }
 
         locationManager.removeUpdates(this)
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, this)
+        locationManager.requestLocationUpdates(provider, 0, 0f, this)
     }
 
     /**

@@ -19,6 +19,14 @@ class TrackingService : Service(), LocationListener {
     private lateinit var locationManager: LocationManager
     private var msgHandler: Handler? = null
 
+    private lateinit var intent: Intent
+
+    override fun onCreate() {
+        super.onCreate()
+        intent = Intent(applicationContext, MapsDisplayActivity::class.java)
+        sendNotification()
+    }
+
     /**
      * On StartService
      */
@@ -32,7 +40,6 @@ class TrackingService : Service(), LocationListener {
      * Initialize Location Manager.
      */
     private fun start() {
-        sendNotification()
         initializeLocationManager()
     }
 
@@ -59,7 +66,6 @@ class TrackingService : Service(), LocationListener {
      * Create notification channel.
      */
     private fun sendNotification() {
-        val intent = Intent(applicationContext, MapsDisplayActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         val notification = NotificationCompat.Builder(this, CHANNEL_ID).apply {
@@ -77,6 +83,7 @@ class TrackingService : Service(), LocationListener {
             CHANNEL_ID, NOTIFICATION_NAME, NotificationManager.IMPORTANCE_DEFAULT
         )
         notificationManager.createNotificationChannel(notificationChannel)
+        startForeground(NOTIFICATION_ID, notification.build())
         notificationManager.notify(NOTIFICATION_ID, notification.build())
     }
 
@@ -124,6 +131,7 @@ class TrackingService : Service(), LocationListener {
      * OnDestroy, set [msgHandler] and cancel notification and remove updates for location manager.
      * Stop service.
      */
+
     override fun onDestroy() {
         super.onDestroy()
         msgHandler = null

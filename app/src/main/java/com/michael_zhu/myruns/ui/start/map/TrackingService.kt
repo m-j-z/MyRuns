@@ -16,6 +16,8 @@ import android.location.LocationManager
 import android.os.*
 import androidx.core.app.NotificationCompat
 import com.michael_zhu.myruns.R
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
 import java.util.concurrent.ArrayBlockingQueue
 import kotlin.math.sqrt
 
@@ -30,8 +32,8 @@ class TrackingService : Service(), LocationListener, SensorEventListener {
     private var x: Double = 0.0
     private var y: Double = 0.0
     private var z: Double = 0.0
-    private lateinit var mAsyncTask: OnSensorChangedTask
     private lateinit var mAccBuffer: ArrayBlockingQueue<Double>
+    private lateinit var job: Job
 
     private lateinit var intent: Intent
 
@@ -50,8 +52,6 @@ class TrackingService : Service(), LocationListener, SensorEventListener {
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         start()
-        mAsyncTask = OnSensorChangedTask()
-        mAsyncTask.execute()
         return START_NOT_STICKY
     }
 
@@ -61,6 +61,62 @@ class TrackingService : Service(), LocationListener, SensorEventListener {
      */
     private fun start() {
         initializeLocationManager()
+        startSensorCoroutine()
+    }
+
+    /**
+     * Creates coroutine that calculates p.
+     * Sends p back to MapsDisplayActivity.
+     */
+    private fun startSensorCoroutine() {
+        job = CoroutineScope(IO).launch {
+            var blockSize = 0
+            val fft = FFT(ACCELEROMETER_BLOCK_CAPACITY)
+            val accBlock = DoubleArray(ACCELEROMETER_BLOCK_CAPACITY)
+            val im = DoubleArray(ACCELEROMETER_BLOCK_CAPACITY)
+            var max: Double
+            while (isActive) {
+                try {
+                    accBlock[blockSize++] =
+                        withContext(IO) {
+                            mAccBuffer.take()
+                        }.toDouble()
+                    if (blockSize == ACCELEROMETER_BLOCK_CAPACITY) {
+                        blockSize = 0
+
+                        max = .0
+                        for (`val` in accBlock) {
+                            if (max < `val`) {
+                                max = `val`
+                            }
+                        }
+                        fft.fft(accBlock, im)
+                        val inst: ArrayList<Double> = ArrayList()
+                        for (i in accBlock.indices) {
+                            val mag = sqrt(
+                                accBlock[i] * accBlock[i] + im[i] * im[i]
+                            )
+                            inst.add(mag)
+                            im[i] = .0
+                        }
+                        inst.add(ACCELEROMETER_BLOCK_CAPACITY, max)
+                        val p = WekaClassifier.classify(inst.toArray())
+
+                        // Put value into bundle and pass back to MapsDisplayActivity
+                        val bundle = Bundle()
+                        bundle.putDouble(BUNDLE_NAME_SENSOR, p)
+                        if (msgHandler != null) {
+                            val message = msgHandler!!.obtainMessage()
+                            message.data = bundle
+                            message.what = MSG_ID_SENSOR
+                            msgHandler!!.sendMessage(message)
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 
     /**
@@ -160,7 +216,7 @@ class TrackingService : Service(), LocationListener, SensorEventListener {
         notificationManager.cancel(NOTIFICATION_ID)
         locationManager.removeUpdates(this)
         sensorManager.unregisterListener(this)
-        mAsyncTask.cancel(true)
+        job.cancel()
         stopSelf()
     }
 
@@ -169,63 +225,6 @@ class TrackingService : Service(), LocationListener, SensorEventListener {
 
         fun setLocationHandler(msgHandler: Handler) {
             service.msgHandler = msgHandler
-        }
-    }
-
-    // p = 0, STANDING
-    // p = 1, WALKING
-    // p = 2, RUNNING
-    inner class OnSensorChangedTask : AsyncTask<Void, Void, Void>() {
-        override fun doInBackground(vararg arg0: Void?): Void? {
-            var blockSize = 0
-            val fft = FFT(ACCELEROMETER_BLOCK_CAPACITY)
-            val accBlock = DoubleArray(ACCELEROMETER_BLOCK_CAPACITY)
-            val im = DoubleArray(ACCELEROMETER_BLOCK_CAPACITY)
-            var max = Double.MIN_VALUE
-            while (true) {
-                try {
-                    // need to check if the AsyncTask is cancelled or not in the while loop
-                    if (isCancelled() == true) {
-                        return null
-                    }
-
-                    // Dumping buffer
-                    accBlock[blockSize++] = mAccBuffer.take().toDouble()
-                    if (blockSize == ACCELEROMETER_BLOCK_CAPACITY) {
-                        blockSize = 0
-
-                        // time = System.currentTimeMillis();
-                        max = .0
-                        for (`val` in accBlock) {
-                            if (max < `val`) {
-                                max = `val`
-                            }
-                        }
-                        fft.fft(accBlock, im)
-                        val inst: ArrayList<Double> = ArrayList()
-                        for (i in accBlock.indices) {
-                            val mag = Math.sqrt(
-                                accBlock[i] * accBlock[i] + im[i] * im[i]
-                            )
-                            inst.add(mag)
-                            im[i] = .0 // Clear the field
-                        }
-                        inst.add(ACCELEROMETER_BLOCK_CAPACITY, max)
-                        val p = WekaClassifier.classify(inst.toArray())
-
-                        val bundle = Bundle()
-                        bundle.putDouble(BUNDLE_NAME_SENSOR, p)
-                        if (msgHandler != null) {
-                            val message = msgHandler!!.obtainMessage()
-                            message.data = bundle
-                            message.what = MSG_ID_SENSOR
-                            msgHandler!!.sendMessage(message)
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
         }
     }
 

@@ -6,25 +6,42 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
-import android.location.Criteria
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.*
 import androidx.core.app.NotificationCompat
 import com.michael_zhu.myruns.R
+import java.util.concurrent.ArrayBlockingQueue
+import kotlin.math.sqrt
 
-class TrackingService : Service(), LocationListener {
+class TrackingService : Service(), LocationListener, SensorEventListener {
     private lateinit var trackingBinder: TrackingBinder
     private lateinit var notificationManager: NotificationManager
     private lateinit var locationManager: LocationManager
     private var msgHandler: Handler? = null
+
+    // Sensors
+    private lateinit var sensorManager: SensorManager
+    private var x: Double = 0.0
+    private var y: Double = 0.0
+    private var z: Double = 0.0
+    private lateinit var mAsyncTask: OnSensorChangedTask
+    private lateinit var mAccBuffer: ArrayBlockingQueue<Double>
 
     private lateinit var intent: Intent
 
     override fun onCreate() {
         super.onCreate()
         intent = Intent(applicationContext, MapsDisplayActivity::class.java)
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME)
+        mAccBuffer = ArrayBlockingQueue<Double>(ACCELEROMETER_BLOCK_CAPACITY)
         sendNotification()
     }
 
@@ -33,6 +50,8 @@ class TrackingService : Service(), LocationListener {
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         start()
+        mAsyncTask = OnSensorChangedTask()
+        mAsyncTask.execute()
         return START_NOT_STICKY
     }
 
@@ -53,14 +72,7 @@ class TrackingService : Service(), LocationListener {
     private fun initializeLocationManager() {
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
 
-        val criteria = Criteria().apply {
-            accuracy = Criteria.ACCURACY_FINE
-            powerRequirement = Criteria.POWER_HIGH
-            horizontalAccuracy = Criteria.ACCURACY_HIGH
-            verticalAccuracy = Criteria.ACCURACY_HIGH
-        }
-        var provider = locationManager.getBestProvider(criteria, true)
-        if (provider == null) provider = LocationManager.GPS_PROVIDER
+        val provider = LocationManager.GPS_PROVIDER
 
         val location = locationManager.getLastKnownLocation(provider)
         if (location != null) {
@@ -147,6 +159,8 @@ class TrackingService : Service(), LocationListener {
         msgHandler = null
         notificationManager.cancel(NOTIFICATION_ID)
         locationManager.removeUpdates(this)
+        sensorManager.unregisterListener(this)
+        mAsyncTask.cancel(true)
         stopSelf()
     }
 
@@ -158,6 +172,88 @@ class TrackingService : Service(), LocationListener {
         }
     }
 
+    // p = 0, STANDING
+    // p = 1, WALKING
+    // p = 2, RUNNING
+    inner class OnSensorChangedTask : AsyncTask<Void, Void, Void>() {
+        override fun doInBackground(vararg arg0: Void?): Void? {
+            var blockSize = 0
+            val fft = FFT(ACCELEROMETER_BLOCK_CAPACITY)
+            val accBlock = DoubleArray(ACCELEROMETER_BLOCK_CAPACITY)
+            val im = DoubleArray(ACCELEROMETER_BLOCK_CAPACITY)
+            var max = Double.MIN_VALUE
+            while (true) {
+                try {
+                    // need to check if the AsyncTask is cancelled or not in the while loop
+                    if (isCancelled() == true) {
+                        return null
+                    }
+
+                    // Dumping buffer
+                    accBlock[blockSize++] = mAccBuffer.take().toDouble()
+                    if (blockSize == ACCELEROMETER_BLOCK_CAPACITY) {
+                        blockSize = 0
+
+                        // time = System.currentTimeMillis();
+                        max = .0
+                        for (`val` in accBlock) {
+                            if (max < `val`) {
+                                max = `val`
+                            }
+                        }
+                        fft.fft(accBlock, im)
+                        val inst: ArrayList<Double> = ArrayList()
+                        for (i in accBlock.indices) {
+                            val mag = Math.sqrt(
+                                accBlock[i] * accBlock[i] + im[i] * im[i]
+                            )
+                            inst.add(mag)
+                            im[i] = .0 // Clear the field
+                        }
+                        inst.add(ACCELEROMETER_BLOCK_CAPACITY, max)
+                        val p = WekaClassifier.classify(inst.toArray())
+
+                        val bundle = Bundle()
+                        bundle.putDouble(BUNDLE_NAME_SENSOR, p)
+                        if (msgHandler != null) {
+                            val message = msgHandler!!.obtainMessage()
+                            message.data = bundle
+                            message.what = MSG_ID_SENSOR
+                            msgHandler!!.sendMessage(message)
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event == null) return
+
+        if (event.sensor.type != Sensor.TYPE_LINEAR_ACCELERATION) return
+
+        x = (event.values[0]).toDouble()
+        y = (event.values[1]).toDouble()
+        z = (event.values[2]).toDouble()
+
+        val m = sqrt(x * x + y * y + z * z)
+
+        try {
+            mAccBuffer.add(m)
+        } catch (e: IllegalStateException) {
+            val newBuffer = ArrayBlockingQueue<Double>(mAccBuffer.size * 2)
+            mAccBuffer.drainTo(newBuffer)
+            mAccBuffer = newBuffer
+            mAccBuffer.add(m)
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        return
+    }
+
     companion object {
         const val CHANNEL_ID = "notification_channel"
         const val NOTIFICATION_NAME = "notification"
@@ -165,7 +261,9 @@ class TrackingService : Service(), LocationListener {
 
         const val BUNDLE_NAME_LOCATION = "location"
         const val MSG_IDENTIFIER = 56228466
+
+        const val ACCELEROMETER_BLOCK_CAPACITY = 64
+        const val BUNDLE_NAME_SENSOR = "sensor"
+        const val MSG_ID_SENSOR = 73661
     }
-
-
 }

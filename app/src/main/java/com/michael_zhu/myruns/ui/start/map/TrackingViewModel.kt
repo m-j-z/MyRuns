@@ -18,6 +18,8 @@ class TrackingViewModel : ViewModel(), ServiceConnection {
     var latLngList: MutableLiveData<ArrayList<Location>> = MutableLiveData<ArrayList<Location>>(
         arrayListOf()
     )
+    val activityTypeList: ArrayList<Double> = ArrayList()
+    val activityType: MutableLiveData<Double> = MutableLiveData()
 
     /**
      * Add [location] to [latLngList].
@@ -61,6 +63,12 @@ class TrackingViewModel : ViewModel(), ServiceConnection {
                 val location: Location =
                     bundle.getParcelable(TrackingService.BUNDLE_NAME_LOCATION) ?: return
                 add(location)
+            }
+            if (msg.what == TrackingService.MSG_ID_SENSOR) {
+                val bundle = msg.data
+                val p = bundle.getDouble(TrackingService.BUNDLE_NAME_SENSOR, -1.0)
+                activityTypeList.add(p)
+                activityType.postValue(p)
             }
         }
     }

@@ -1,14 +1,11 @@
 package com.michael_zhu.myruns.ui.start.map
 
 import android.Manifest
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -40,7 +37,7 @@ import java.time.ZoneId
 import java.util.*
 import kotlin.math.abs
 
-class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickListener, SensorEventListener {
+class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClickListener {
     private var isBind: Boolean = false
     private var inserted: Boolean = false
     private var i: Long = 1
@@ -75,12 +72,6 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
     private lateinit var entry: LiveData<Entry>
     private lateinit var lastEntry: Flow<Long>
 
-    // Sensors
-    private lateinit var sensorManager: SensorManager
-    private var x: Double = 0.0
-    private var y: Double = 0.0
-    private var z: Double = 0.0
-
     /**
      * Sets the view of the activity, initializes the map, creates the input view model,
      * adds listeners to the buttons and creates the database instance.
@@ -112,12 +103,6 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
 
         if (savedInstanceState != null) {
             isBind = savedInstanceState.getBoolean(BIND_STATUS_KEY)
-        }
-
-        if (inputViewModel.id == -1L && inputViewModel.inputType == "Automatic") {
-            sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-            val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-            sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
         }
     }
 
@@ -251,6 +236,17 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
                 )!!
 
                 calculateStats(it)
+            }
+        }
+
+        if (inputViewModel.inputType == "Automatic") {
+            trackingViewModel.activityType.observe(this) {
+                when (it) {
+                    0.0 -> inputViewModel.activityType = "Standing"
+                    1.0 -> inputViewModel.activityType = "Walking"
+                    2.0 -> inputViewModel.activityType = "Running"
+                    else -> inputViewModel.activityType = "Unknown"
+                }
             }
         }
 
@@ -463,6 +459,16 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
         inputViewModel.duration = getDuration()
         inputViewModel.distance = getDistance(trackingViewModel.getAll())
 
+        if (inputViewModel.inputType == "Automatic") {
+            val frequentActivity = trackingViewModel.activityTypeList.groupingBy { it }.eachCount()
+            when (frequentActivity.maxBy { it.value }.key) {
+                0.0 -> inputViewModel.activityType = "Standing"
+                1.0 -> inputViewModel.activityType = "Walking"
+                2.0 -> inputViewModel.activityType = "Running"
+                else -> inputViewModel.activityType = "Unknown"
+            }
+        }
+
         val entry = Entry(
             inputType = inputViewModel.inputType,
             activityType = inputViewModel.activityType,
@@ -567,27 +573,12 @@ class MapsDisplayActivity : AppCompatActivity(), OnMapReadyCallback, View.OnClic
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        if (inputViewModel.id == -1L && inputViewModel.inputType == "Automatic") {
-            sensorManager.unregisterListener(this)
-        }
-    }
-
-    // Sensors
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event == null) return
-
-        if (event.sensor.type != Sensor.TYPE_ACCELEROMETER) return
-
-        x = (event.values[0] / SensorManager.GRAVITY_EARTH).toDouble()
-        y = (event.values[1] / SensorManager.GRAVITY_EARTH).toDouble()
-        z = (event.values[2] / SensorManager.GRAVITY_EARTH).toDouble()
-
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        return
+    override fun onDestroy() {
+        super.onDestroy()
+        trackingViewModel.activityType.removeObservers(this)
+        stopService(intent)
+        unbindService()
+        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
     }
 
     companion object {
